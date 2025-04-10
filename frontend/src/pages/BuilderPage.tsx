@@ -1,8 +1,13 @@
-import { Code2 } from "lucide-react";
+import { Code2, Download, Cloudy } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Code from "../components/Code";
+import Preview from "../components/Preview";
+import Toggle from "../components/Toggle";
+import { useState } from "react";
 
 function BuilderPage() {
   const navigate = useNavigate();
+  const [toggle, setToggle] = useState(true);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -13,11 +18,11 @@ function BuilderPage() {
             ← Back to Home
           </button>
           <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
-              Save
+            <button className="flex space-x-2 items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
+              <span>Download</span><Download />
             </button>
-            <button className="px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
-              Deploy
+            <button className="flex space-x-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-lg transition-colors">
+              <span>Deploy</span><Cloudy />
             </button>
           </div>
         </div>
@@ -44,35 +49,10 @@ function BuilderPage() {
           </div>
         </div>
 
-        {/* Editor */}
-        <div className="flex-1 bg-gray-900">
-          <div className="p-4">
-            <div className="bg-gray-800 rounded-lg p-4">
-              <pre className="text-sm text-gray-300">
-                <code>{`<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Project</title>
-</head>
-<body>
-    <h1>Welcome to DevStudio</h1>
-</body>
-</html>`}</code>
-              </pre>
-            </div>
-          </div>
-        </div>
-
-        {/* Preview */}
-        <div className="w-1/3 bg-gray-800 border-l border-gray-700 p-4">
-          <h2 className="text-lg font-semibold mb-4">Preview</h2>
-          <div className="bg-white rounded-lg p-4 h-full">
-            <div className="text-black">
-              <h1 className="text-2xl font-bold">Welcome to DevStudio</h1>
-            </div>
-          </div>
+        {/* Code & Preview */}
+        <div className="flex-1 p-5 border flex flex-col space-y-4 justify-center">
+          <Toggle toggle={toggle} setToggle={setToggle} />
+          { toggle ? <Code /> : <Preview />}
         </div>
       </div>
     </div>
