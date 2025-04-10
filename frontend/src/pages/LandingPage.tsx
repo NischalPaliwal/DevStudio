@@ -25,7 +25,7 @@ const LandingPage = () => {
             <div className="hidden md:flex md:items-center md:space-x-8">
               <a href="#" className="hover:text-blue-400 transition-colors">Documentation</a>
               <a href="#" className="hover:text-blue-400 transition-colors">Templates</a>
-              <a onClick={() => (window.open('https://github.com/NischalPaliwal/'))} className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
+              <a onClick={() => (window.open('https://github.com/NischalPaliwal/DevStudio'))} className="flex items-center space-x-2 hover:text-blue-400 transition-colors">
                 <Github className="w-5 h-5" />
                 <span>GitHub</span>
               </a>
