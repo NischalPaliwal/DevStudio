@@ -6,8 +6,9 @@ import Toggle from "../components/Toggle";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import axios from 'axios';
-import { Step } from "../types/type";
+import { Step, FileItem, StepType } from "../types/type";
 import { parseXML } from "../steps";
+import { FileExplorer } from "../components/FileExplorer";
 
 function BuilderPage() {
   const navigate = useNavigate();
@@ -15,6 +16,8 @@ function BuilderPage() {
   const [toggle, setToggle] = useState(true);
   const { prompt } = location.state as { prompt : string };
   const [steps, setSteps] = useState<Step[]>([]);
+  const [files, setFiles] = useState<FileItem[]>([]);
+  const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
   
   const init = async () => {
     const response = await axios.post('http://localhost:4352/template', {
@@ -24,23 +27,85 @@ function BuilderPage() {
 
     setSteps(parseXML(uiPrompts[0]));
 
-    // const stepsResponse = await axios.post('http://localhost:4352/chat', {
-    //   messages: [...prompts, prompt].map((content) => ({
-    //     role: 'user',
-    //     content: content
-    //   }))
-    // });
-    // console.log(stepsResponse.data);
+    const stepsResponse = await axios.post('http://localhost:4352/chat', {
+      messages: [...prompts, prompt].map((content) => ({
+        role: 'user',
+        content: content
+      }))
+    });
   }
 
   useEffect(() => {
     init();
   }, []);
 
+  useEffect(() => {
+    let originalFiles = [...files];
+    let updateHappened = false;
+    steps.filter(({status}) => status === "pending").map(step => {
+      updateHappened = true;
+      if (step?.type === StepType.CreateFile) {
+        let parsedPath = step.path?.split("/") ?? []; // ["src", "components", "App.tsx"]
+        let currentFileStructure = [...originalFiles]; // {}
+        let finalAnswerRef = currentFileStructure;
+  
+        let currentFolder = ""
+        while(parsedPath.length) {
+          currentFolder =  `${currentFolder}/${parsedPath[0]}`;
+          let currentFolderName = parsedPath[0];
+          parsedPath = parsedPath.slice(1);
+  
+          if (!parsedPath.length) {
+            // final file
+            let file = currentFileStructure.find(x => x.path === currentFolder)
+            if (!file) {
+              currentFileStructure.push({
+                name: currentFolderName,
+                type: 'file',
+                path: currentFolder,
+                content: step.code
+              })
+            } else {
+              file.content = step.code;
+            }
+          } else {
+            /// in a folder
+            let folder = currentFileStructure.find(x => x.path === currentFolder)
+            if (!folder) {
+              // create the folder
+              currentFileStructure.push({
+                name: currentFolderName,
+                type: 'folder',
+                path: currentFolder,
+                children: []
+              })
+            }
+  
+            currentFileStructure = currentFileStructure.find(x => x.path === currentFolder)!.children!;
+          }
+        }
+        originalFiles = finalAnswerRef;
+      }
+
+    })
+
+    if (updateHappened) {
+
+      setFiles(originalFiles)
+      setSteps(steps => steps.map((s: Step) => {
+        return {
+          ...s,
+          status: "completed"
+        }
+        
+      }))
+    }
+  }, [steps, files]);
+
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
       {/* Builder Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700 flex-shrink-0">
+      <nav className="bg-gray-950 border-b border-gray-700 flex-shrink-0">
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
           <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white transition-colors">
             ← Back to Home
@@ -63,26 +128,15 @@ function BuilderPage() {
       {/* Builder Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 flex-shrink-0 overflow-y-auto">
-          <h2 className="text-lg font-semibold mb-4">Project Files</h2>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-gray-300 hover:text-white cursor-pointer">
-              <Code2 className="w-4 h-4" />
-              <span>index.html</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-300 hover:text-white cursor-pointer">
-              <Code2 className="w-4 h-4" />
-              <span>styles.css</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-300 hover:text-white cursor-pointer">
-              <Code2 className="w-4 h-4" />
-              <span>app.js</span>
-            </div>
-          </div>
+        <div className="col-span-1 w-64">
+          <FileExplorer 
+            files={files} 
+            onFileSelect={setSelectedFile}
+          />
         </div>
         {/* Code & Preview */}
         <div className="flex-1 overflow-hidden">
-          {toggle ? <Code steps={steps} /> : <Preview />}
+          {toggle ? <Code selectedFile={selectedFile} steps={steps} /> : <Preview />}
         </div>
       </div>
     </div>
