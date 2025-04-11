@@ -4,6 +4,7 @@ import Code from "../components/Code";
 import Preview from "../components/Preview";
 import Toggle from "../components/Toggle";
 import { useState } from "react";
+import Button from "../components/Button";
 
 function BuilderPage() {
   const navigate = useNavigate();
@@ -17,6 +18,10 @@ function BuilderPage() {
           <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white transition-colors">
             ← Back to Home
           </button>
+          <Button />
+          <div className="p-1 flex flex-col space-y-4 justify-center">
+            <Toggle setToggle={setToggle} />
+          </div>
           <div className="flex items-center space-x-4">
             <button className="flex space-x-2 items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors">
               <span>Download</span><Download />
@@ -48,12 +53,8 @@ function BuilderPage() {
             </div>
           </div>
         </div>
-
         {/* Code & Preview */}
-        <div className="flex-1 p-5 border flex flex-col space-y-4 justify-center">
-          <Toggle toggle={toggle} setToggle={setToggle} />
           { toggle ? <Code /> : <Preview />}
-        </div>
       </div>
     </div>
   );
