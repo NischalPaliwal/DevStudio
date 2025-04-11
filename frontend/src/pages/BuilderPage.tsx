@@ -1,19 +1,46 @@
 import { Code2, Download, Cloudy } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Code from "../components/Code";
 import Preview from "../components/Preview";
 import Toggle from "../components/Toggle";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "../components/Button";
+import axios from 'axios';
+import { Step } from "../types/type";
+import { parseXML } from "../steps";
 
 function BuilderPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [toggle, setToggle] = useState(true);
+  const { prompt } = location.state as { prompt : string };
+  const [steps, setSteps] = useState<Step[]>([]);
+  
+  const init = async () => {
+    const response = await axios.post('http://localhost:4352/template', {
+        prompt: prompt.trim()
+    });
+    const { prompts, uiPrompts } = response.data;
+
+    setSteps(parseXML(uiPrompts[0]));
+
+    // const stepsResponse = await axios.post('http://localhost:4352/chat', {
+    //   messages: [...prompts, prompt].map((content) => ({
+    //     role: 'user',
+    //     content: content
+    //   }))
+    // });
+    // console.log(stepsResponse.data);
+  }
+
+  useEffect(() => {
+    init();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
       {/* Builder Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700">
+      <nav className="bg-gray-800 border-b border-gray-700 flex-shrink-0">
         <div className="container mx-auto px-6 py-3 flex justify-between items-center">
           <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white transition-colors">
             ← Back to Home
@@ -34,9 +61,9 @@ function BuilderPage() {
       </nav>
 
       {/* Builder Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <div className="w-64 bg-gray-800 border-r border-gray-700 p-4">
+        <div className="w-64 bg-gray-800 border-r border-gray-700 p-4 flex-shrink-0 overflow-y-auto">
           <h2 className="text-lg font-semibold mb-4">Project Files</h2>
           <div className="space-y-2">
             <div className="flex items-center space-x-2 text-gray-300 hover:text-white cursor-pointer">
@@ -54,7 +81,9 @@ function BuilderPage() {
           </div>
         </div>
         {/* Code & Preview */}
-          { toggle ? <Code /> : <Preview />}
+        <div className="flex-1 overflow-hidden">
+          {toggle ? <Code steps={steps} /> : <Preview />}
+        </div>
       </div>
     </div>
   );

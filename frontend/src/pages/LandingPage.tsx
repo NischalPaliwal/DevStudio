@@ -1,12 +1,16 @@
 import { Github, Terminal, Zap, Box, Code2, Sparkles, ChevronRight, Heart, Globe, Twitter, Linkedin } from 'lucide-react';
 import Starfield from 'react-starfield';
 import FeatureCard from "../components/FeatureCard";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
     const [prompt, setPrompt] = useState('');
     const navigate = useNavigate();
+    const handleSubmit = async (e : React.FormEvent) => {
+      e.preventDefault();
+      navigate('/build', { state: { prompt } });
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
@@ -60,7 +64,7 @@ const LandingPage = () => {
               </div>
               
               <button 
-                onClick={() => navigate('/build')}
+                onClick={handleSubmit}
                 className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold flex items-center mx-auto space-x-2 transition-colors"
               >
                 <span>Start Building</span>

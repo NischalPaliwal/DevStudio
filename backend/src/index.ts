@@ -5,11 +5,13 @@ import { getSystemPrompt, BASE_PROMPT } from "./prompts";
 import express from "express";
 import { basePrompt as reactBasePrompt } from "./defaults/react";
 import { basePrompt as nodeBasePrompt } from "./defaults/node";
+import cors from "cors";
 
 const app = express();
 const langdbProjectId = '16dd4fef-9827-4409-8edf-2f0c4b4a9a83';
 
 app.use(express.json());
+app.use(cors());
 
 const client = new OpenAI({
   baseURL: `https://api.us-east-1.langdb.ai/${langdbProjectId}/v1`,
@@ -47,7 +49,7 @@ app.post('/template', async (req, res) => {
 
       else if (answer == "node") {
         res.json({
-            prompts: [`Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${reactBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
+            prompts: [`Here is an artifact that contains all files of the project visible to you.\nConsider the contents of ALL files in the project.\n\n${nodeBasePrompt}\n\nHere is a list of files that exist on the file system but are not being shown to you:\n\n  - .gitignore\n  - package-lock.json\n`],
             uiPrompts: [nodeBasePrompt]
         });
         return;
@@ -61,14 +63,14 @@ app.post('/template', async (req, res) => {
 
 app.post('/chat', async (req, res) => {
     const messages = req.body.messages;
-    const systemPrompt = [{
+    const systemPrompt = {
         role: "system",
         content: getSystemPrompt(),
-    }];
+    };
     const response = await client.chat.completions.create({
         model: 'anthropic/claude-3-5-sonnet-20240620',
-        messages: [...systemPrompt, ...messages],
-        max_tokens: 8000,
+        messages: [systemPrompt, ...messages],
+        max_tokens: 4096,
         temperature: 0,
         stream: true
       });
