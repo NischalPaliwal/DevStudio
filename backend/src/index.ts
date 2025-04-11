@@ -72,15 +72,9 @@ app.post('/chat', async (req, res) => {
         messages: [systemPrompt, ...messages],
         max_tokens: 4096,
         temperature: 0,
-        stream: true
+        stream: false
       });
-
-      for await (const chunk of response) {
-        if (chunk.choices[0]?.delta?.content) {
-        console.log(chunk.choices[0].delta.content);
-        }
-      }
-      res.json({});
+      res.json({ response: response.choices[0].message.content });
 });
 
 // async function getAssistantReply() {

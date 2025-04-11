@@ -1,4 +1,4 @@
-import { Code2, Download, Cloudy } from "lucide-react";
+import { Download, Cloudy } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Code from "../components/Code";
 import Preview from "../components/Preview";

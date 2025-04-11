@@ -8,13 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __asyncValues = (this && this.__asyncValues) || function (o) {
-    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
-    var m = o[Symbol.asyncIterator], i;
-    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
-    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
-    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -74,8 +67,6 @@ app.post('/template', (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 }));
 app.post('/chat', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, e_1, _b, _c;
-    var _d, _e;
     const messages = req.body.messages;
     const systemPrompt = {
         role: "system",
@@ -86,26 +77,9 @@ app.post('/chat', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         messages: [systemPrompt, ...messages],
         max_tokens: 4096,
         temperature: 0,
-        stream: true
+        stream: false
     });
-    try {
-        for (var _f = true, response_1 = __asyncValues(response), response_1_1; response_1_1 = yield response_1.next(), _a = response_1_1.done, !_a; _f = true) {
-            _c = response_1_1.value;
-            _f = false;
-            const chunk = _c;
-            if ((_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content) {
-                console.log(chunk.choices[0].delta.content);
-            }
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (!_f && !_a && (_b = response_1.return)) yield _b.call(response_1);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    res.json({});
+    res.json({ response: response.choices[0].message.content });
 }));
 // async function getAssistantReply() {
 //   const response = await client.chat.completions.create({
