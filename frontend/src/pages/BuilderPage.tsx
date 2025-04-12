@@ -1,4 +1,4 @@
-import { Download, Cloudy } from "lucide-react";
+import { Download, Cloudy, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Code from "../components/Code";
 import Preview from "../components/Preview";
@@ -23,9 +23,13 @@ function BuilderPage() {
     const response = await axios.post('http://localhost:4352/template', {
         prompt: prompt.trim()
     });
+
     const { prompts, uiPrompts } = response.data;
 
-    setSteps(parseXML(uiPrompts[0]));
+    setSteps(parseXML(uiPrompts[0]).map((x: Step) => ({
+      ...x,
+      status: "pending"
+    })));
 
     const stepsResponse = await axios.post('http://localhost:4352/chat', {
       messages: [...prompts, prompt].map((content) => ({
@@ -33,6 +37,11 @@ function BuilderPage() {
         content: content
       }))
     });
+
+    setSteps(s => [...s, ...parseXML(stepsResponse.data.response).map((x) => ({
+      ...x,
+      status: "pending" as "pending"
+    }))]);
   }
 
   useEffect(() => {
