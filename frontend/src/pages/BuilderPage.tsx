@@ -194,7 +194,7 @@ function BuilderPage() {
         </div>
         {/* Code & Preview */}
         <div className="flex-1 overflow-hidden">
-          {toggle ? <Code selectedFile={selectedFile} steps={steps} /> : <Preview />}
+          {toggle ? <Code selectedFile={selectedFile} steps={steps} /> : <Preview files={files} webContainer={webContainer} />}
         </div>
       </div>
     </div>
