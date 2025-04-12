@@ -3,6 +3,7 @@ import Starfield from 'react-starfield';
 import FeatureCard from "../components/FeatureCard";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DevPic from "../images/nischal_jodhpur_profile_pic.jpg";
 
 const LandingPage = () => {
     const [prompt, setPrompt] = useState('');
@@ -77,9 +78,9 @@ const LandingPage = () => {
               <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8">
                 <div className="relative">
                   <img
-                    src="https://nischalstore.blob.core.windows.net/store/nischal_jodhpur_profile_pic.jpg"
+                    src={DevPic}
                     alt="Nischal Paliwal"
-                    className="w-48 h-48 rounded-xl object-cover ring-4 ring-blue-500/20"
+                    className="w-48 h-48 rounded-xl object-cover ring-4 ring-blue-500/20 hover:scale-150 cursor-pointer"
                   />
                   <div className="absolute -bottom-3 -right-3 bg-blue-500 rounded-full p-2">
                     <Terminal className="w-5 h-5" />
