@@ -10,7 +10,6 @@ import { Step, FileItem, StepType } from "../types/type";
 import { parseXML } from "../steps";
 import { FileExplorer } from "../components/FileExplorer";
 import { useWebContainer } from "../hooks/useWebContainer";
-import { FileNode } from "@webcontainer/api";
 
 function BuilderPage() {
   const navigate = useNavigate();
