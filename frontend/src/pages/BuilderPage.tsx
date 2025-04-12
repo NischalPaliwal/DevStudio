@@ -1,4 +1,4 @@
-import { Download, Cloudy, X } from "lucide-react";
+import { Download, Cloudy } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Code from "../components/Code";
 import Preview from "../components/Preview";
@@ -9,10 +9,13 @@ import axios from 'axios';
 import { Step, FileItem, StepType } from "../types/type";
 import { parseXML } from "../steps";
 import { FileExplorer } from "../components/FileExplorer";
+import { useWebContainer } from "../hooks/useWebContainer";
+import { FileNode } from "@webcontainer/api";
 
 function BuilderPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const webContainer = useWebContainer();
   const [toggle, setToggle] = useState(true);
   const { prompt } = location.state as { prompt : string };
   const [steps, setSteps] = useState<Step[]>([]);
@@ -60,7 +63,7 @@ function BuilderPage() {
   
         let currentFolder = ""
         while(parsedPath.length) {
-          currentFolder =  `${currentFolder}/${parsedPath[0]}`;
+          currentFolder = `${currentFolder}/${parsedPath[0]}`;
           let currentFolderName = parsedPath[0];
           parsedPath = parsedPath.slice(1);
   
@@ -110,6 +113,53 @@ function BuilderPage() {
       }))
     }
   }, [steps, files]);
+
+  useEffect(() => {
+    const createMountStructure = (files: FileItem[]): Record<string, any> => {
+      const mountStructure: Record<string, any> = {};
+  
+      const processFile = (file: FileItem, isRootFolder: boolean) => {  
+        if (file.type === 'folder') {
+          // For folders, create a directory entry
+          mountStructure[file.name] = {
+            directory: file.children ? 
+              Object.fromEntries(
+                file.children.map(child => [child.name, processFile(child, false)])
+              ) 
+              : {}
+          };
+        } else if (file.type === 'file') {
+          if (isRootFolder) {
+            mountStructure[file.name] = {
+              file: {
+                contents: file.content || ''
+              }
+            };
+          } else {
+            // For files, create a file entry with contents
+            return {
+              file: {
+                contents: file.content || ''
+              }
+            };
+          }
+        }
+  
+        return mountStructure[file.name];
+      };
+  
+      // Process each top-level file/folder
+      files.forEach(file => processFile(file, true));
+  
+      return mountStructure;
+    };
+  
+    const mountStructure = createMountStructure(files);
+  
+    // Mount the structure if WebContainer is available
+    console.log(mountStructure);
+    webContainer?.mount(mountStructure);
+  }, [files, webContainer]);
 
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
